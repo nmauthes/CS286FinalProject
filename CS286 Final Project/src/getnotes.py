@@ -1,24 +1,35 @@
 from music21 import *
+import pickle
+
+# Load the list of song data else create a new one
+try:
+    songList = pickle.load(open("song_data.pickle", "rb"))
+except IOError:
+    songList = []
 
 # Get and parse the xml file
-song = converter.parse('C:/Users/Matthieu/Documents/MuseScore2/Scores/Test.xml')
+currentSong = converter.parse("Puccini_Madama_Butterfly_Addio_fiorito_asil_-Melody.xml")
 
 # Assign each chord symbol its proper duration
-harmony.realizeChordSymbolDurations(song)
+harmony.realizeChordSymbolDurations(currentSong)
 
-# Transpose to C
-keySig = song.flat.getElementsByClass(key.KeySignature)[0]
+# Get first key signature and transpose to C
+keySig = currentSong.flat.getElementsByClass(key.KeySignature)[0]
 dist = interval.Interval(keySig.asKey().tonic, pitch.Pitch('C'))
-transposed = song.transpose(dist)
+transposed = currentSong.transpose(dist)
 
 # Stores note/chord pairs
-tuples = []
+noteTuples = []
 
-# Get the pairs from the score (TODO...)
+# Get the pairs from the score
 for cs in transposed.flat.getElementsByClass(harmony.ChordSymbol):
     for n in transposed.flat.getElementsByClass(note.Note):
         if n.offset >= cs.offset and n.offset < (cs.offset + cs.duration.quarterLength):
-            pair = (n, cs)
-            tuples.append(pair)
-            
-print(tuples) # Feed tuples to HMM
+            pair = (n.name, cs.figure)
+            noteTuples.append(pair)
+
+# Append current song data to song list and pickle          
+songList.append(noteTuples)
+pickle.dump(songList, open("song_data.pickle", "wb"))
+
+# print(songList)
