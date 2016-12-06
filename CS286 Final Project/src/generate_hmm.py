@@ -18,12 +18,15 @@ for chord in chord_types:
         chords.append(note + chord)
 
 # 2 + 4 * 12 = 50 chords
-print ("number of chords:",len(chords), " and chords: ")
-print (chords)
+print("number of chords:" ,len(chords), " and chords: ")
+print(chords)
 
-# initialize note_chord_matrix and transition_matrix to all 0s
-note_chord_matrix = [[0 for x in range(len(chords))] for y in range(len(notes))]
+# initialize emission_matrix and transition_matrix to all 0s
+emission_matrix = [[0 for x in range(len(notes))] for y in range(len(chords)-2)]
 transition_matrix = [[0 for x in range(len(chords))] for y in range(len(chords))]
+import pprint
+pprint.pprint(emission_matrix)
+pprint.pprint(transition_matrix)
 # -------------------------------------------------------------------------------
 
 
@@ -34,7 +37,7 @@ def add_data(note_chord_pair):
     note_index = notes.index(next_note)
     chord_index = chords.index(next_chord)
     # increment the two matrices
-    note_chord_matrix[note_index][chord_index] += 1
+    emission_matrix[chord_index - 2][note_index] += 1
     transition_matrix[previous_chord_index][chord_index] += 1
     # keep track of current chord
     previous_chord_index = chord_index
@@ -42,14 +45,14 @@ def add_data(note_chord_pair):
 
 # normalize each row in the two matrices
 def normalize_matrices():
-    for row in range(len(note_chord_matrix)):
+    for row in range(len(emission_matrix)):
         row_total = 0
-        for col in range(len(note_chord_matrix[row])):
-            row_total += note_chord_matrix[row][col]
-        for col in range(len(note_chord_matrix[row])):
+        for col in range(len(emission_matrix[row])):
+            row_total += emission_matrix[row][col]
+        for col in range(len(emission_matrix[row])):
             if row_total is not 0:
-                note_chord_matrix[row][col] /= row_total
-    for row in range(len(note_chord_matrix)):
+                emission_matrix[row][col] /= row_total
+    for row in range(len(emission_matrix)):
         row_total = 0
         for col in range(len(transition_matrix[row])):
             row_total += transition_matrix[row][col]
@@ -63,6 +66,7 @@ def normalize_matrices():
 try:
     training_data = pickle.load(open("song_data.pickle", "rb"))
 except IOError:
+    print('no data loaded, so load dummy data')
     training_data = [[('C', 'C'), ('A', 'Amin')], [('C', 'C'), ('A', 'Amin')]]
 
 for song in training_data:
@@ -73,14 +77,14 @@ for song in training_data:
     # reset to beginning of song
     previous_chord_index = 0
 
-# print note_chord_matrix
+# print emission_matrix
 normalize_matrices()
 
 
-def build_distribution(index, distribution):
-    for i in range(len(note_chord_matrix[index])):
-        distribution[chords[i]]= note_chord_matrix[index][i]
-    # print distribution
+def build_distribution(index):
+    for i in range(len(emission_matrix[index])):
+        dists[index][chords[i+2]]= emission_matrix[index][i]
+    # print(dists[index])
 
 
 # TO DO... build out the distribution dictionary for c major chord
@@ -100,9 +104,9 @@ dists = [c_distribution, cs_distribution, d_distribution, ds_distribution, e_dis
          fsdim_distribution, gdim_distribution, gsdim_distribution, adim_distribution, asdim_distribution,
          bdim_distribution]
 
-print('Show distributions')
-for i in range(12):
-    build_distribution(i, dists[i])
+# build distributions from emission matrix
+for i in range(len(dists)):
+    build_distribution(i)
 
 # create model
 model = yahmm.Model(name="chord-generator")
@@ -185,10 +189,3 @@ model.bake( verbose=True )
 file = open('model.txt', 'w')
 model.write(file)
 file.close()
-
-sequence = ['D']
-logp, path = model.viterbi( sequence )
-print(path)
-for state in path:
-    print(state[1].name)
-
