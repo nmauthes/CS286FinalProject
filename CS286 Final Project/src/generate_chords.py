@@ -14,10 +14,11 @@ keySig = s.flat.getElementsByClass(key.KeySignature)[0]
 dist = interval.Interval(keySig.asKey().tonic, pitch.Pitch('C'))
 transposed = s.transpose(dist)
 
-# Get note names as strings and put in list
+#Get first note of measure as string and put in list
 sequence = []
-for n in s.flat.getElementsByClass(note.Note):
-    sequence.append(n.name)
+for m in transposed.parts[0].getElementsByClass(stream.Measure):
+    if m.notes:
+        sequence.append(m.notes[0].name)
 
 # use imported model to generate chords based on roboccini output
 logp, path = model.viterbi( sequence )
