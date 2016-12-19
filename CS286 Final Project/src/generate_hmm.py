@@ -5,7 +5,7 @@ import pickle
 notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 # notes = [note.Note("C")]
 # chord types: major, minor
-chord_types = ['', 'm', 'aug', 'dim']
+chord_types = ['', 'm', 'aug', '+']
 # start off with start and end, chords are our hidden states
 chords = ['start', 'end']
 
