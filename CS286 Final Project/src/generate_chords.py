@@ -25,7 +25,7 @@ logp, path = model.viterbi( sequence )
 if path is not None:
     # Build chord symbol objs and transpose to original key
     symbols = []
-    for state in path:
+    for state in path[1:]:
         newSymbol = harmony.ChordSymbol(state[1].name)
         newSymbol.transpose(dist.reverse(), inPlace = True)
         symbols.append(newSymbol)
