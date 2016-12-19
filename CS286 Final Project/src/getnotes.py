@@ -8,7 +8,7 @@ except IOError:
     songList = []
 
 # Get and parse the xml file
-currentSong = converter.parse("Puccini_Madama_Butterfly_Addio_fiorito_asil_-Melody.xml")
+currentSong = converter.parse("TOSCA-Melody.xml")
 
 # Assign each chord symbol its proper duration
 harmony.realizeChordSymbolDurations(currentSong)
@@ -25,6 +25,12 @@ noteTuples = []
 for cs in transposed.flat.getElementsByClass(harmony.ChordSymbol):
     for n in transposed.flat.getElementsByClass(note.Note):
         if n.offset >= cs.offset and n.offset < (cs.offset + cs.duration.quarterLength):
+            if n.pitch.accidental and n.pitch.accidental.name == 'flat': # Convert flats to sharps for model
+                n.pitch.getEnharmonic(inPlace = True)
+                
+            if cs.root().accidental and cs.root().accidental.name == 'flat':
+                cs.root().getEnharmonic(inPlace = True)
+            
             pair = (n.name, cs.figure)
             noteTuples.append(pair)
 
@@ -32,4 +38,4 @@ for cs in transposed.flat.getElementsByClass(harmony.ChordSymbol):
 songList.append(noteTuples)
 pickle.dump(songList, open("song_data.pickle", "wb"))
 
-# print(songList)
+print(songList)
