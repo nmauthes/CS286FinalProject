@@ -3,9 +3,8 @@ import pickle
 
 # all possible notes
 notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-# notes = [note.Note("C")]
-# chord types: major, minor
-chord_types = ['', 'm', 'aug', '+']
+# chord types: major, minor, augmented, diminished
+chord_types = ['', 'm', '+', 'dim']
 # start off with start and end, chords are our hidden states
 chords = ['start', 'end']
 
@@ -18,15 +17,15 @@ for chord in chord_types:
         chords.append(note + chord)
 
 # 2 + 4 * 12 = 50 chords
-print("number of chords:" ,len(chords), " and chords: ")
+print("number of chords:" ,len(chords), " and chords are: ")
 print(chords)
 
 # initialize emission_matrix and transition_matrix to all 0s
 emission_matrix = [[0 for x in range(len(notes))] for y in range(len(chords)-2)]
 transition_matrix = [[0 for x in range(len(chords))] for y in range(len(chords))]
-import pprint
-pprint.pprint(emission_matrix)
-pprint.pprint(transition_matrix)
+# import pprint
+# pprint.pprint(emission_matrix)
+# pprint.pprint(transition_matrix)
 # -------------------------------------------------------------------------------
 
 
