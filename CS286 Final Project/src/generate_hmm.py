@@ -1,6 +1,6 @@
 import yahmm
 import pickle
-
+import note_mapping
 # all possible notes
 notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 # chord types: major, minor, augmented, diminished
@@ -17,7 +17,7 @@ for chord in chord_types:
         chords.append(note + chord)
 
 # 2 + 4 * 12 = 50 chords
-print("number of chords:" ,len(chords), " and chords are: ")
+print("number of chords:", len(chords), " and chords are: ")
 print(chords)
 
 # initialize emission_matrix and transition_matrix to all 0s
@@ -33,6 +33,20 @@ transition_matrix = [[0 for x in range(len(chords))] for y in range(len(chords))
 def add_data(note_chord_pair):
     next_note, next_chord = note_chord_pair
     global previous_chord_index
+
+    # map flats to naturals and sharps
+    if len(next_note) > 1 and next_note[1] is '-':
+        # print("original note", next_note)
+        mapped_note = note_mapping.note_map[next_note[0:2]]
+        # print("mapped note", mapped_note)
+        next_note = mapped_note
+    if len(next_chord) > 1 and next_chord[1] is '-':
+        # print("original chord", next_chord)
+        mapped_chord = note_mapping.note_map[next_chord[0:2]]
+        # print("mapped chord", mapped_chord)
+        mapped_chord += next_chord[2:]
+        next_chord = mapped_chord
+
     note_index = notes.index(next_note)
     chord_index = chords.index(next_chord)
     # increment the two matrices
@@ -64,6 +78,8 @@ def normalize_matrices():
 # training data is a list of list of tuples (or set of tuple of tuples)
 try:
     training_data = pickle.load(open("song_data.pickle", "rb"))
+    import pprint
+    pprint.pprint(training_data)
 except IOError:
     print('no data loaded, so load dummy data')
     training_data = [[('C', 'C'), ('A', 'Amin')], [('C', 'C'), ('A', 'Amin')]]
